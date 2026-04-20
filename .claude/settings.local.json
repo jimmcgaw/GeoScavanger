@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(django-admin startproject:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
