@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: geoaudio
+      POSTGRES_PASSWORD: geoaudio
+      POSTGRES_DB: geoaudio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoaudio -d geoaudio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DATABASE_URL: postgresql://geoaudio:geoaudio@db:5432/geoaudio
+      SECRET_KEY: dev-insecure-change-me
+      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,web
+      GOOGLE_CLIENT_ID: ""
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgis_data:
